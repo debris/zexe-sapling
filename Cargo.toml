@@ -7,5 +7,20 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-algebra = { path = "../zexe/algebra", default-features = false }
-groth16 = { path = "../zexe/groth16", default-features = false }
+#algebra = { path = "../zexe/algebra", default-features = false }
+#groth16 = { path = "../zexe/groth16", default-features = false }
+
+[dependencies.algebra]
+git = "https://github.com/scipr-lab/zexe"
+rev = "2c22b770afffc8ed99dfca6677bfcea3cf2ff406"
+default-features = false
+
+[dependencies.groth16]
+git = "https://github.com/scipr-lab/zexe"
+rev = "2c22b770afffc8ed99dfca6677bfcea3cf2ff406"
+default-features = false
+
+[dependencies.zexe-redjubjub]
+path = "../zexe-redjubjub"
+#git = "https://github.com/debris/zexe-redjubjub"
+#rev = "6b46dbd0657fba2576ff8c3f56fc1631b44c3d82"
