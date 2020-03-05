@@ -75,8 +75,7 @@ fn accept_spend(
         return Err(());
     }
 
-    // TODO: logic requiring sapling_crypto::multipack
-
+    // TODO: assertion that requires sapling_crypto::multipack
     Ok(())
 }
 
