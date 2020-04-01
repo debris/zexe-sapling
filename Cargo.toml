@@ -12,12 +12,13 @@ edition = "2018"
 
 [dependencies.algebra]
 git = "https://github.com/scipr-lab/zexe"
-rev = "2c22b770afffc8ed99dfca6677bfcea3cf2ff406"
+rev = "5a7974a73de2557e6a8e8ecfd80b860f7d483602"
 default-features = false
+features = ["jubjub", "bls12_381"]
 
 [dependencies.groth16]
 git = "https://github.com/scipr-lab/zexe"
-rev = "2c22b770afffc8ed99dfca6677bfcea3cf2ff406"
+rev = "5a7974a73de2557e6a8e8ecfd80b860f7d483602"
 default-features = false
 
 [dependencies.zexe-redjubjub]

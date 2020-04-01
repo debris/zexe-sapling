@@ -5,7 +5,9 @@ extern crate alloc;
 mod data;
 
 use algebra::{
-    curves::{bls12_381::Bls12_381Parameters, jubjub::JubJubParameters, models::bls12::Bls12},
+    bls12_381::Parameters as Bls12_381Parameters,
+    curves::models::bls12::Bls12,
+    jubjub::JubJubParameters,
     prelude::{Group, Zero},
     FromBytes, ModelParameters,
 };
