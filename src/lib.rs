@@ -3,9 +3,10 @@
 extern crate alloc;
 
 mod data;
+mod multipack;
 
 use algebra::{
-    bls12_381::Parameters as Bls12_381Parameters,
+    bls12_381::{self, Parameters as Bls12_381Parameters},
     curves::models::bls12::Bls12,
     jubjub::JubJubParameters,
     prelude::{Group, Zero},
@@ -13,9 +14,10 @@ use algebra::{
 };
 use alloc::vec::Vec;
 use core::ops::{Add, Neg};
-use data::{Sapling, SaplingOutputDescription, SaplingSpendDescription};
 use groth16::{verify_proof, PreparedVerifyingKey, Proof};
 use zexe_redjubjub::{read_point, write_point, FixedGenerators, PublicKey, Signature};
+
+pub use data::{Sapling, SaplingOutputDescription, SaplingSpendDescription};
 
 pub type Groth16VerifyingKey = PreparedVerifyingKey<Bls12<Bls12_381Parameters>>;
 pub type Point = zexe_redjubjub::Point<JubJubParameters>;
@@ -38,12 +40,14 @@ pub fn accept_sapling(
     accept_sapling_final(sighash, total, sapling)
 }
 
-fn accept_spend(
-    _spend_vk: &Groth16VerifyingKey,
+pub fn accept_spend(
+    spend_vk: &Groth16VerifyingKey,
     sighash: &[u8; 32],
     total: &mut Point,
     spend: &SaplingSpendDescription,
 ) -> Result<(), ()> {
+    use algebra::ProjectiveCurve;
+
     // deserialize and check value commitment
     let value_commitment = require_non_small_order_point(&spend.value_commitment)?;
 
@@ -51,7 +55,7 @@ fn accept_spend(
     *total += &value_commitment;
 
     // deserialize the anchor, which should be an element of Fr
-    let _anchor = <JubJubParameters as ModelParameters>::BaseField::read(&spend.anchor as &[u8])
+    let anchor = <JubJubParameters as ModelParameters>::BaseField::read(&spend.anchor as &[u8])
         .map_err(|_| ())?;
 
     // compute the signature's message for randomized key && spend_auth_sig
@@ -77,7 +81,34 @@ fn accept_spend(
         return Err(());
     }
 
-    // TODO: assertion that requires sapling_crypto::multipack
+	// Add the nullifier through multiscalar packing
+	let nullifier = multipack::bytes_to_bits_le(&spend.nullifier);
+    let nullifier = multipack::compute_multipacking::<bls12_381::g1::Parameters>(&nullifier);
+	assert_eq!(nullifier.len(), 2);
+
+    let randomized_key_xy = randomized_key.point.into_affine();
+    let value_xy = value_commitment.into_affine();
+    let public_input = [
+        randomized_key_xy.x,
+        randomized_key_xy.y,
+        value_xy.x,
+        value_xy.y,
+        anchor,
+        nullifier[0],
+        nullifier[1],
+    ];
+
+    // deserialize the proof
+    let zkproof =
+        Proof::<Bls12<Bls12_381Parameters>>::read(&spend.zkproof as &[u8]).map_err(|_| ())?;
+
+    // check the proof
+    let is_verification_ok = verify_proof(&spend_vk, &zkproof, &public_input).map_err(|_| ())?;
+
+    if !is_verification_ok {
+        return Err(());
+    }
+
     Ok(())
 }
 
