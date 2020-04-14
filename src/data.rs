@@ -1,4 +1,5 @@
 use crate::Vec;
+use core::fmt;
 
 ///
 #[derive(Clone)]
@@ -93,6 +94,18 @@ impl PartialEq<Sapling> for Sapling {
     }
 }
 
+impl fmt::Debug for Sapling {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: remove allocations
+        f.debug_struct("Sapling")
+            .field("balancing_value", &self.balancing_value)
+            .field("spends", &self.spends)
+            .field("outputs", &self.outputs)
+            .field("binding_sig", &self.binding_sig.to_vec())
+            .finish()
+    }
+}
+
 impl Default for SaplingSpendDescription {
     fn default() -> Self {
         SaplingSpendDescription {
@@ -117,6 +130,20 @@ impl PartialEq<SaplingSpendDescription> for SaplingSpendDescription {
     }
 }
 
+impl fmt::Debug for SaplingSpendDescription {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: remove allocations
+        f.debug_struct("SaplingSpendDescription")
+            .field("value_commitment", &self.value_commitment)
+            .field("anchor", &self.anchor)
+            .field("nullifier", &self.nullifier)
+            .field("randomized_key", &self.randomized_key)
+            .field("zkproof", &self.zkproof.to_vec())
+            .field("spend_auth_sig", &self.spend_auth_sig.to_vec())
+            .finish()
+    }
+}
+
 impl Default for SaplingOutputDescription {
     fn default() -> Self {
         SaplingOutputDescription {
@@ -138,5 +165,19 @@ impl PartialEq<SaplingOutputDescription> for SaplingOutputDescription {
             && self.enc_cipher_text.as_ref() == other.enc_cipher_text.as_ref()
             && self.out_cipher_text.as_ref() == other.out_cipher_text.as_ref()
             && self.zkproof.as_ref() == other.zkproof.as_ref()
+    }
+}
+
+impl fmt::Debug for SaplingOutputDescription {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: remove allocations
+        f.debug_struct("SaplingSpendDescription")
+            .field("value_commitment", &self.value_commitment)
+            .field("note_commitment", &self.note_commitment)
+            .field("ephemeral_key", &self.ephemeral_key)
+            .field("enc_cipher_text", &self.enc_cipher_text.to_vec())
+            .field("out_cipher_text", &self.out_cipher_text.to_vec())
+            .field("zkproof", &self.zkproof.to_vec())
+            .finish()
     }
 }
